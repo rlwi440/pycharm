@@ -53,11 +53,12 @@
         margin: auto;
         text-align: center;
     }
+    .
 
     .clean {
         color: blue;
     }
-    .table {
+    .table{
         margin: auto;
     }
 
@@ -70,39 +71,73 @@
 
     $(document).ready(function () {
         get_rate();
-        listing();  //목록
+        listing();
     });
-    function listing () {
-          $.ajax({
-              type: "GET",
-              url: "/review",
-              data: {},
-              success: function (response) {
-                  console.log (response);
-              }
-          })
+
+    function listing() {
+        $.ajax({
+            type: "GET",
+            url: "/order",
+            data: {},
+            success: function (response) {
+                if (response["result"] == "success") {
+                    let orders = response['orders'];
+                    for (let i = 0; i < orders.length; i++) {
+                        let name= orders[i]['name'];
+                        let item= orders[i]['item'];
+                        let address= orders[i]['address'];
+                        let number= orders[i]['number'];
+
+
+                            let temp_html = `<tr>
+                                                <th scope="row">${name}</th>
+                                                <td>${item}</td>
+                                                <td>${address}</td>
+                                                <td>${number}</td>
+                                            </tr>`
+                            $('#orders-box').append(temp_html)
+                    }
+                }
+            }
+        })
     }
-
-
-
     function get_rate() {
         $.ajax({
             type: "GET",
             url: "https://api.manana.kr/exchange/rate.json",
             data: {},
             success: function (response) {
-                let now_rate=response[1]['rate'];
+                let now_rate = response[1]['rate'];
                 $('#now_rate').text(now_rate);
             }
         })
     }
 
+    function order() {
+        let name = $('#order-name').val();
+        let item = $('#order-item').val();
+        let address = $('#order-address').val();
+        let number = $('#order-number').val();
+
+        $.ajax({
+            type: "POST",
+            url: "/order",
+            data: {name_give: name, item_give: item, address_give: address, number_give: number},
+            success: function (response) {
+                if (response["result"] == "success") {
+                    alert(response["msg"]);
+                    window.location.reload();
+                }
+            }
+        })
+    }
 </script>
 
 <body>
 <div class="wrap">
     <div class="Ryan"></div>
     <div class="loopy">
+
         <h1>루피를 보여드립니다..<span class="font">가격 30,000원/개</span></h1>
         <p> 이 루피는 겉보기엔 특별한것이 없지만, 계속 보다보면 이쁩니다.</p>
         <p class="clean">달러-원 환율:<span id="now_rate">1219.15</span></p>
@@ -112,14 +147,15 @@
         <div class="input-group-prepend">
             <span class="input-group-text">주문자 이름</span>
         </div>
-        <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+        <input id="order-name" type="text" class="form-control" aria-label="Default"
+               aria-describedby="inputGroup-sizing-default">
     </div>
 
     <div class="input-group mb-3">
         <div class="input-group-prepend">
             <label class="input-group-text" for="inputGroupSelect01">수량</label>
         </div>
-        <select class="custom-select" id="inputGroupSelect01">
+        <select id="order-item" class="custom-select" id="inputGroupSelect01">
             <option selected>수량을 선택하세요</option>
             <option value="1">1</option>
             <option value="2">2</option>
@@ -130,46 +166,30 @@
         <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-default">주소</span>
         </div>
-        <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+        <input id="order-address" type="text" class="form-control" aria-label="Default"
+               aria-describedby="inputGroup-sizing-default">
     </div>
     <div class="input-group mb-3">
         <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-default">전화번호</span>
         </div>
-        <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+        <input id="order-number" type="text" class="form-control" aria-label="Default"
+               aria-describedby="inputGroup-sizing-default">
     </div>
     <button type="button" onclick="order()" class="btn btn-primary btn-order">주문하기</button>
-
     <table class="table">
-  <thead>
-    <tr>
-      <th scope="col">이름</th>
-      <th scope="col">수량</th>
-      <th scope="col">주소</th>
-      <th scope="col">전화번호</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row">1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td>Larry</td>
-      <td>the Bird</td>
-      <td>@twitter</td>
-    </tr>
-  </tbody>
-</table>
+        <thead>
+        <tr>
+            <th scope="col">이름</th>
+            <th scope="col">수량</th>
+            <th scope="col">주소</th>
+            <th scope="col">전화번호</th>
+        </tr>
+        </thead >
+        <tbody id="orders-box">
+        </tbody>
+    </table>
+
 </div>
 
 </body>
